@@ -14,7 +14,7 @@ const commonConfig: webpack.Configuration = {
     path: util.output,
 
     // 如果发布第三方包，可以启动下面这三个配置
-    library: "ReactRxStream",
+    library: "ReactRxBuilder",
     libraryTarget: "umd",
     globalObject: "this",
 
