@@ -37,7 +37,7 @@ class Util {
    */
   get output(): string {
     const out = this.tsconfig ? this.tsconfig.compilerOptions.outDir : "dist";
-    return path.resolve(this.rootPath, out);
+    return path.resolve(this.rootPath, out, "umd");
   }
 }
 const util = new Util();

@@ -1,3 +1,7 @@
+## 0.2.1 [2021-7-21]
+
+- publish umd and esm
+
 ## 0.2.0 [2021-7-21]
 
 - Rename library name to ReactRxBuilder

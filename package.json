@@ -1,13 +1,15 @@
 {
   "name": "react-rxbuilder",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Componentized Rxjs Observable",
   "private": false,
-  "main": "./dist/react-rxbuilder.js",
-  "module": "./src/index.ts",
-  "types": "./dist/index.d.ts",
+  "main": "./dist/umd/react-rxbuilder.js",
+  "module": "./dist/esm/index.js",
+  "types": "./dist/types/index.d.ts",
   "scripts": {
-    "build": "cross-env TS_NODE_PROJECT=config/webpack/tsconfig.json NODE_ENV=production webpack -c config/webpack/prod.config.ts"
+    "esm": "tsc --project tsconfig.esm.json",
+    "umd": "cross-env TS_NODE_PROJECT=config/webpack/tsconfig.json NODE_ENV=production webpack -c config/webpack/prod.config.ts",
+    "build": "npm run umd && npm run esm"
   },
   "keywords": [
     "react-rxbuilder",

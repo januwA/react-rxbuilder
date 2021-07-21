@@ -35,7 +35,7 @@ const commonConfig: webpack.Configuration = {
               configFile: path.join(
                 util.rootPath,
                 process.env.NODE_ENV === "production"
-                  ? "tsconfig.build.json"
+                  ? "tsconfig.types.json"
                   : "tsconfig.json"
               ),
             },
