@@ -16,6 +16,7 @@ export declare class AsyncSnapshot<T> {
     get hasData(): boolean;
     get hasError(): boolean;
     get requireData(): T;
+    get rdata(): T;
     inState(state: ConnectionState): AsyncSnapshot<T>;
     toString(): string;
 }

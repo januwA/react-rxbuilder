@@ -39,6 +39,9 @@ export class AsyncSnapshot {
             throw this.error;
         throw "Snapshot has neither data nor error";
     }
+    get rdata() {
+        return this.requireData;
+    }
     inState(state) {
         return new AsyncSnapshot(state, this.data, this.error);
     }

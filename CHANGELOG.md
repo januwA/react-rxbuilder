@@ -1,3 +1,20 @@
+## 0.4.0 [2021-7-22]
+
+- add `useService` hook
+- remove `useBehaviorSubject` hook
+
+## 0.3.2 [2021-7-22]
+
+- *test version*
+
+## 0.3.1 [2021-7-22]
+
+- *test version*
+
+## 0.3.0 [2021-7-22]
+
+- add `useBehaviorSubject` hook
+
 ## 0.2.1 [2021-7-21]
 
 - publish umd and esm

@@ -42,6 +42,13 @@ export class AsyncSnapshot<T> {
     throw "Snapshot has neither data nor error";
   }
 
+  /**
+   * 我更新喜欢这种方式，所以添加了一个
+   */
+  get rdata(): T {
+    return this.requireData;
+  }
+
   inState(state: ConnectionState): AsyncSnapshot<T> {
     return new AsyncSnapshot<T>(state, this.data, this.error);
   }

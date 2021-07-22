@@ -16,7 +16,6 @@ import { RxBuilder, ConnectionState } from "react-rxbuilder";
 import { map, timer } from "rxjs";
 
 export function TestPage() {
-  const [state, sstate] = useState(0);
   const [timer$] = useState(
     timer(1000, 500).pipe(
       map((v) => {
@@ -33,33 +32,28 @@ export function TestPage() {
   }, []);
 
   return (
-    <div>
-      <RxBuilder stream={timer$}>
-        {(snap) => {
-          console.log(snap.toString());
+    <RxBuilder stream={timer$}>
+      {(snap) => {
+        console.log(snap.toString());
 
-          if (snap.connectionState === ConnectionState.waiting) {
-            return <p>loading...</p>;
-          }
+        if (snap.connectionState === ConnectionState.waiting) {
+          return <p>loading...</p>;
+        }
 
-          if (
-            snap.connectionState === ConnectionState.active ||
-            snap.connectionState === ConnectionState.done
-          ) {
-            if (snap.hasError) return <p>{snap.error}</p>;
+        if (
+          snap.connectionState === ConnectionState.active ||
+          snap.connectionState === ConnectionState.done
+        ) {
+          if (snap.hasError) return <p>{snap.error}</p>;
 
-            if (!snap.hasData) return <p>not data</p>;
+          if (!snap.hasData) return <p>not data</p>;
 
-            return <p>{snap.data}</p>;
-          }
+          return <p>{snap.data}</p>;
+        }
 
-          return null;
-        }}
-      </RxBuilder>
-
-      <p>{state}</p>
-      <button onClick={() => sstate(state + 1)}>click me</button>
-    </div>
+        return null;
+      }}
+    </RxBuilder>
   );
 }
 ```
@@ -76,7 +70,6 @@ function IncBut(props: { count$: BehaviorSubject<number> }) {
 }
 
 export function TestPage() {
-  const [state, sstate] = useState(0);
   const [count$] = useState(new BehaviorSubject<number>(0));
   const [count2$] = useState(count$.pipe(debounceTime(200)));
 
@@ -113,9 +106,6 @@ export function TestPage() {
           return null;
         }}
       </RxBuilder>
-
-      <IncBut count$={count$} />
-      <button onClick={() => sstate(state + 1)}>click me {state}</button>
     </>
   );
 }
@@ -134,20 +124,18 @@ export function TestPage() {
     )
   );
   return (
-    <>
-      <RxBuilder stream={json$}>
-        {(snap) => {
-          console.log(snap);
-          
-          if (snap.connectionState === ConnectionState.waiting)
-            return <p>loading...</p>;
+    <RxBuilder stream={json$}>
+      {(snap) => {
+        console.log(snap);
+        
+        if (snap.connectionState === ConnectionState.waiting)
+          return <p>loading...</p>;
 
-          if (snap.hasData) return <p>{JSON.stringify(snap.data)}</p>;
+        if (snap.hasData) return <p>{JSON.stringify(snap.data)}</p>;
 
-          return null;
-        }}
-      </RxBuilder>
-    </>
+        return null;
+      }}
+    </RxBuilder>
   );
 }
 ```
@@ -194,3 +182,122 @@ export function TestPage() {
   );
 }
 ```
+
+## useService
+
+Separate components from logic (Data will be contributed throughout the app)
+
+If you only want the service to act on a single page, set the second parameter isShared to false.
+
+```ts
+import React, { useEffect } from "react";
+import { Link } from "react-router-dom";
+import { RxBuilder, useService } from "react-rxbuilder";
+
+// your service
+class UserinfoService {
+  userinfo?: {
+    id: number;
+    name: string;
+    username: string;
+    email: string;
+  };
+
+  loading = true;
+
+  async initData() {
+    this.loading = true;
+    const r = await fetch("https://jsonplaceholder.typicode.com/users/1");
+    this.userinfo = await r.json();
+    this.loading = false;
+  }
+
+  async getData() {
+    if (this.userinfo) return this.userinfo;
+    await this.initData();
+    return this.userinfo;
+  }
+
+  addid() {
+    this.userinfo!.id++;
+  }
+
+  newname() {
+    this.userinfo!.username = "ajanuw";
+  }
+}
+
+export function TestPage() {
+  const { service, service$ } = useService(new UserinfoService());
+
+  useEffect(() => {
+    service.getData();
+  }, []);
+
+  return (
+    <RxBuilder stream={service$}>
+      {(snap) => {
+        if (!snap.hasData) return null;
+        if (service.loading) return <p>loading data ...</p>;
+
+        return (
+          <div>
+            <p>id: {service.userinfo?.id}</p>
+            <p>{service.userinfo?.username}</p>
+            <p>{service.userinfo?.email}</p>
+            <button onClick={service.addid}>clickme</button>
+            <Link to={"/test2"}>to test2 page</Link>
+          </div>
+        );
+      }}
+    </RxBuilder>
+  );
+}
+
+export function Test2Page() {
+  const { service, service$ } = useService(new UserinfoService());
+
+  useEffect(() => {
+    service.getData();
+  }, []);
+
+  return (
+    <RxBuilder stream={service$}>
+      {(snap) => {
+        if (!snap.hasData) return null;
+        if (service.loading) return <p>loading data ...</p>;
+
+        return (
+          <div>
+            <p>id: {service.userinfo?.id}</p>
+            <p>{service.userinfo?.username}</p>
+            <p>{service.userinfo?.email}</p>
+            <button onClick={service.addid}>clickme</button>
+            <button onClick={service.newname}>newname</button>
+            <Link to={"/test"}>to test page</Link>
+          </div>
+        );
+      }}
+    </RxBuilder>
+  );
+}
+```
+
+After using the service, you need to consume the data of the service anywhere else, for example like this
+
+```ts
+new UserinfoService().loading = true;
+```
+
+Then you have to use `singleton` to create a singleton
+
+```ts
+import { singleton } from "react-rxbuilder";
+class UserinfoService {
+  constructor() {
+    return singleton(this);
+  }
+}
+```
+
+- If you don’t know anything, you can press `f12` on the api, and the editor will navigate you to the source code of the api (if you are using vscode)

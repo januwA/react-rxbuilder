@@ -12,13 +12,9 @@ const commonConfig: webpack.Configuration = {
   output: {
     filename: `[name].js`,
     path: util.output,
-
-    // 如果发布第三方包，可以启动下面这三个配置
     library: "ReactRxBuilder",
     libraryTarget: "umd",
     globalObject: "this",
-
-    // 清理dist
     clean: true,
   },
   module: {
@@ -46,7 +42,6 @@ const commonConfig: webpack.Configuration = {
   },
 
   resolve: {
-    // 导入此类文件时，不用添加文件后缀
     extensions: [".tsx", ".ts", ".js"],
   },
 };
