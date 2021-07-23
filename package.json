@@ -1,6 +1,6 @@
 {
   "name": "react-rxbuilder",
-  "version": "0.5.1",
+  "version": "0.6.0",
   "description": "Componentized Rxjs Observable",
   "private": false,
   "main": "./dist/umd/react-rxbuilder.js",
@@ -52,5 +52,8 @@
     "webpack-cli": "^4.7.2",
     "webpack-dev-server": "^3.11.2",
     "webpack-merge": "^5.8.0"
+  },
+  "dependencies": {
+    "reflect-metadata": "^0.1.13"
   }
 }

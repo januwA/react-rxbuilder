@@ -1,3 +1,10 @@
+## 0.6.0 [2021-7-23]
+
+- Add `Injectable` and `RxService`  
+- Create a service using dependency injection
+- remove `useService` hook
+- update readme
+
 ## 0.5.1 [2021-7-23]
 
 - update examples

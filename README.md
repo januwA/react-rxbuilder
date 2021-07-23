@@ -2,13 +2,15 @@
 
 Use rxjs Observable on react components, Inspiration comes from flutter's  [StreamBuilder](https://api.flutter.dev/flutter/widgets/StreamBuilder-class.html)
 
+Use dependency injection to create services, inspired by Angular
+
 
 ## Install
 ```
 $ npm i react-rxbuilder
 ```
 
-## Example
+## use RxBuilder
 
 ```tsx
 import { useEffect, useState } from "react";
@@ -183,104 +185,71 @@ export function TestPage() {
 }
 ```
 
-## useService
+## RxService
+
+Dependency injection service
+
+*When there is a dependency cycle, do not hesitate to write the two dependencies as one*
 
 ```ts
-import React, { useEffect } from "react";
-import { Link } from "react-router-dom";
-import { RxBuilder, useService, singleton } from "react-rxbuilder";
+import ReactDOM from "react-dom";
+import { BrowserRouter, Switch, Route, Link } from "react-router-dom";
+import { Injectable, RxService } from "../src";
 
-class UserinfoService {
-  static ins = new UserinfoService();
-  private constructor() {
-    return singleton(this);
-  }
+@Injectable("instance")
+export class LogService {
+  static instance: LogService;
 
-  userinfo?: {
-    id: number;
-    name: string;
-    username: string;
-    email: string;
-  };
-
-  loading = true;
-
-  async initData() {
-    this.loading = true;
-    const r = await fetch("https://jsonplaceholder.typicode.com/users/1");
-    this.userinfo = await r.json();
-    this.loading = false;
-  }
-
-  async getData() {
-    if (this.userinfo) return this.userinfo;
-    await this.initData();
-    return this.userinfo;
-  }
-
-  addid() {
-    this.userinfo!.id++;
-  }
-
-  newname() {
-    this.userinfo!.username = "ajanuw";
+  private len = 0;
+  logs: string[] = [];
+  log() {
+    this.logs.push(`(${++this.len}) Log: ${new Date().toLocaleTimeString()}`);
   }
 }
 
-export function TestPage() {
-  const [ service, service$ ] = useService(UserinfoService.ins);
+@Injectable()
+export class CountService {
+  static ins: CountService;
+  constructor(public log: LogService) {}
 
-  useEffect(() => {
-    service.getData();
-  }, []);
-
-  return (
-    <RxBuilder stream={service$}>
-      {(snap) => {
-        if (!snap.hasData) return null;
-        if (service.loading) return <p>loading data ...</p>;
-
-        return (
-          <div>
-            <p>id: {service.userinfo?.id}</p>
-            <p>{service.userinfo?.username}</p>
-            <p>{service.userinfo?.email}</p>
-            <button onClick={UserinfoService.ins.addid}>clickme</button>
-            <Link to={"/test2"}>to test2 page</Link>
-          </div>
-        );
-      }}
-    </RxBuilder>
-  );
+  count = 0;
+  inc() {
+    this.count++;
+    this.log.log();
+  }
 }
 
-export function Test2Page() {
-  const [ service, service$ ] = useService(UserinfoService.ins);
+ReactDOM.render(
+  <BrowserRouter>
+    <RxService>
+      {() => (
+        <Switch>
 
-  useEffect(() => {
-    service.getData();
-  }, []);
+          <Route path="/test">
+            <p>{CountService.ins.count}</p>
+            <button onClick={CountService.ins.inc}>click me</button>
+          </Route>
 
-  return (
-    <RxBuilder stream={service$}>
-      {(snap) => {
-        if (!snap.hasData) return null;
-        if (service.loading) return <p>loading data ...</p>;
+          <Route path="/">
+            <button onClick={CountService.ins.inc}>
+              click me {CountService.ins.count}
+            </button>
+            <br />
+            <Link to="/test">Go To About Page</Link>
+            <ul>
+              {LogService.instance.logs.map((e) => {
+                return <li key={e}>{e}</li>;
+              })}
+            </ul>
+          </Route>
+          
+        </Switch>
+      )}
+    </RxService>
+  </BrowserRouter>,
 
-        return (
-          <div>
-            <p>id: {service.userinfo?.id}</p>
-            <p>{service.userinfo?.username}</p>
-            <p>{service.userinfo?.email}</p>
-            <button onClick={service.addid}>clickme</button>
-            <button onClick={service.newname}>newname</button>
-            <Link to={"/test"}>to test page</Link>
-          </div>
-        );
-      }}
-    </RxBuilder>
-  );
-}
+  document.getElementById("root")
+);
 ```
 
 
