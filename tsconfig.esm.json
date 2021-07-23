@@ -1,9 +1,15 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
+    "rootDir": "./src/",
     "outDir": "./dist/esm",
     "sourceMap": false,
     "declaration": false,
     "declarationMap": false
   },
+  "exclude": [
+    "config",
+    "dist",
+    "examples"
+  ]
 }

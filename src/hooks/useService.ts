@@ -3,8 +3,36 @@ import { BehaviorSubject } from "rxjs";
 import { observable } from "./observable";
 
 const SERVICE = "__SERVICE__";
-const SINGLETON = "__SINGLETON__";
 
+/**
+ * 初始化单例和流
+ * @param ctx
+ * @returns
+ */
+function _init<T>(ctx: T): T {
+  const prototype = Object.getPrototypeOf(ctx);
+  const cons = prototype.constructor;
+
+  const proxyInstance: T = observable(
+    ctx,
+    () => service$.next(proxyInstance),
+    new WeakMap()
+  );
+
+  const service$ = new BehaviorSubject<T>(proxyInstance);
+
+  cons[SERVICE] = {
+    instance: proxyInstance,
+    service$,
+  };
+  return proxyInstance;
+}
+
+/**
+ * 创建单例,返回单例
+ * @param ctx
+ * @returns
+ */
 export function singleton<T>(ctx: T): T {
   const prototype = Object.getPrototypeOf(ctx);
   const staticCtx = Object.getOwnPropertyDescriptor(prototype, "constructor");
@@ -14,15 +42,9 @@ export function singleton<T>(ctx: T): T {
   }
 
   const cons = staticCtx.value;
-  if (!cons.hasOwnProperty(SINGLETON)) {
-    cons[SINGLETON] = {
-      instance: null,
-    };
-  }
 
-  return cons[SINGLETON].instance
-    ? cons[SINGLETON].instance
-    : (cons[SINGLETON].instance = ctx);
+  if (!cons.hasOwnProperty(SERVICE)) return _init(ctx);
+  return cons[SERVICE].instance;
 }
 
 /**
@@ -36,32 +58,19 @@ export function singleton<T>(ctx: T): T {
 export function useService<T>(
   service: T,
   isShared = true
-): {
-  service: T;
-  service$: BehaviorSubject<T>;
-
-  /**
-   * 销毁流和缓存的单例，通常没必要这样做，service将在app声明其中一直存在
-   *
-   * isShared = false时会在页面销毁时自动销毁
-   */
-  destroy: () => void;
-} {
+): [service: T, service$: BehaviorSubject<T>, destroy: () => void] {
   if (!isShared) {
-    // 不会共享，页面销毁时自动销毁
-    const proxyService = observable(service, () => service$.next(proxyService));
+    // 临时 service
+    const proxyService: T = observable(
+      service,
+      () => service$.next(proxyService),
+      new WeakMap()
+    );
     const [service$] = useState(new BehaviorSubject<T>(proxyService));
     useEffect(() => {
       return () => service$.unsubscribe();
     }, []);
-
-    return {
-      service: proxyService as T,
-      service$: service$ as BehaviorSubject<T>,
-      destroy: () => {
-        /* 自动销毁 */
-      },
-    };
+    return [proxyService, service$, () => {}];
   }
 
   const prototype = Object.getPrototypeOf(service);
@@ -73,48 +82,16 @@ export function useService<T>(
 
   const cons = staticCtx.value;
   if (!cons.hasOwnProperty(SERVICE)) {
-    cons[SERVICE] = {
-      service: null,
-      service$: null,
-    };
+    _init(service);
   }
 
   const destroy = () => {
-    cons[SERVICE].service = null;
+    cons[SERVICE].instance = null;
     if (cons[SERVICE].service$)
       (cons[SERVICE].service$ as BehaviorSubject<T>).unsubscribe();
     cons[SERVICE].service$ = null;
+    delete cons[SERVICE];
   };
 
-  if (cons[SERVICE].service) {
-    // 已经被代理过直接返回数据
-    return {
-      service: cons[SERVICE].service as T,
-      service$: cons[SERVICE].service$,
-      destroy,
-    };
-  } else {
-    // 代理数据
-    const proxyService: T = observable(service, () =>
-      service$.next(proxyService)
-    );
-
-    // 是否是使用singleton创建的单例
-    if (cons[SINGLETON] && cons[SINGLETON].instance) {
-      cons[SINGLETON].instance = proxyService;
-    }
-
-    // 创建流
-    const [service$] = useState(new BehaviorSubject<T>(proxyService));
-
-    // 写入缓存
-    cons[SERVICE].service = proxyService;
-    cons[SERVICE].service$ = service$;
-
-    return {
-      service: proxyService as T,
-      service$: service$ as BehaviorSubject<T>,
-      destroy,
-    };
-  }
+  return [cons[SERVICE].instance as T, cons[SERVICE].service$, destroy];
 }

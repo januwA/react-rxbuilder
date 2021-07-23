@@ -16,7 +16,7 @@
     "sourceMap": true, /* 生成相应的“ .map”文件。 */
     // "outFile": "./",                       /* Concatenate and emit output to single file. */
     "outDir": "./dist/", /* Redirect output structure to the directory. */
-    "rootDir": "./src/", /* Specify the root directory of input files. Use to control the output directory structure with --outDir. */
+    "rootDir": "./", /* Specify the root directory of input files. Use to control the output directory structure with --outDir. */
     // "composite": true,                     /* Enable project compilation */
     // "tsBuildInfoFile": "./",               /* Specify file to store incremental compilation information */
     "removeComments": true, /* 不要输出注释 */
@@ -42,7 +42,6 @@
     "moduleResolution": "node", /* Specify module resolution strategy: 'node' (Node.js) or 'classic' (TypeScript pre-1.6). */
     "baseUrl": "./", /* 基本目录，用于解析非绝对模块名称。 */
     "paths": {}, /* 一系列条目将导入重新映射到相对于“ baseUrl”的查找位置。 */
-    // "rootDirs": [],                        /* List of root folders whose combined content represents the structure of the project at runtime. */
     "typeRoots": [
       "node_modules/@types"
     ], /* 包含类型定义的文件夹列表。 */
@@ -64,8 +63,7 @@
     "forceConsistentCasingInFileNames": true /* 禁止对同一文件使用大小写不一致的引用。 */
   },
   "exclude": [
-    "node_modules",
-    "dist",
-    "config"
+    "config",
+    "dist"
   ]
 }

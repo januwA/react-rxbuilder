@@ -9,13 +9,14 @@ function getOwnPropertyDescriptor(target, key) {
         return des;
     return getOwnPropertyDescriptor(Object.getPrototypeOf(target), key);
 }
-export function observable(data, changed) {
-    if (!isLikeOnject(data))
+export function observable(data, changed, objcache) {
+    if (!isLikeOnject(data) || objcache.has(data))
         return data;
+    objcache.set(data, true);
     for (const key in data) {
         const value = data[key];
         if (isLikeOnject(value))
-            data[key] = observable(value, changed);
+            data[key] = observable(value, changed, objcache);
     }
     const proxy = new Proxy(data, {
         get(target, key) {
@@ -28,7 +29,7 @@ export function observable(data, changed) {
         },
         set(target, key, value, receiver) {
             const des = getOwnPropertyDescriptor(target, key);
-            value = observable(value, changed);
+            value = observable(value, changed, objcache);
             if (des?.set)
                 des.set.call(proxy, value);
             else

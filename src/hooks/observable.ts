@@ -16,15 +16,22 @@ function getOwnPropertyDescriptor(
  *
  * @param data 需要被代理的数据，必须是 object
  * @param changed 触发set之后会触发changed
+ * @param objcache 避免递归对象
  * @returns
  */
-export function observable(data: any, changed: () => void) {
-  if (!isLikeOnject(data)) return data;
+export function observable(
+  data: any,
+  changed: () => void,
+  objcache: WeakMap<any, boolean>
+) {
+  if (!isLikeOnject(data) || objcache.has(data)) return data;
+
+  objcache.set(data, true);
 
   for (const key in data) {
     const value = data[key];
     // 递归代理
-    if (isLikeOnject(value)) data[key] = observable(value, changed);
+    if (isLikeOnject(value)) data[key] = observable(value, changed, objcache);
   }
 
   const proxy: any = new Proxy(data, {
@@ -37,7 +44,7 @@ export function observable(data: any, changed: () => void) {
     },
     set(target: any, key: any, value: any, receiver: any) {
       const des = getOwnPropertyDescriptor(target, key);
-      value = observable(value, changed);
+      value = observable(value, changed, objcache);
       if (des?.set) des.set.call(proxy, value);
       else target[key] = value;
       changed();

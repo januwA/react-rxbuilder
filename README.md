@@ -58,7 +58,7 @@ export function TestPage() {
 }
 ```
 
-## Example use Subject
+## use Subject
 ```tsx
 import { useState } from "react";
 import { RxBuilder } from "react-rxbuilder";
@@ -111,7 +111,7 @@ export function TestPage() {
 }
 ```
 
-## Example: Get asynchronous data
+## Get asynchronous data
 ```tsx
 import { useState } from "react";
 import { ConnectionState, RxBuilder } from "react-rxbuilder";
@@ -140,7 +140,7 @@ export function TestPage() {
 }
 ```
 
-## Example use PromiseBuilder
+## PromiseBuilder
 
 ```tsx
 import { ConnectionState, PromiseBuilder } from "react-rxbuilder";
@@ -185,17 +185,17 @@ export function TestPage() {
 
 ## useService
 
-Separate components from logic (Data will be contributed throughout the app)
-
-If you only want the service to act on a single page, set the second parameter isShared to false.
-
 ```ts
 import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
-import { RxBuilder, useService } from "react-rxbuilder";
+import { RxBuilder, useService, singleton } from "react-rxbuilder";
 
-// your service
 class UserinfoService {
+  static ins = new UserinfoService();
+  private constructor() {
+    return singleton(this);
+  }
+
   userinfo?: {
     id: number;
     name: string;
@@ -228,7 +228,7 @@ class UserinfoService {
 }
 
 export function TestPage() {
-  const { service, service$ } = useService(new UserinfoService());
+  const [ service, service$ ] = useService(UserinfoService.ins);
 
   useEffect(() => {
     service.getData();
@@ -245,7 +245,7 @@ export function TestPage() {
             <p>id: {service.userinfo?.id}</p>
             <p>{service.userinfo?.username}</p>
             <p>{service.userinfo?.email}</p>
-            <button onClick={service.addid}>clickme</button>
+            <button onClick={UserinfoService.ins.addid}>clickme</button>
             <Link to={"/test2"}>to test2 page</Link>
           </div>
         );
@@ -255,7 +255,7 @@ export function TestPage() {
 }
 
 export function Test2Page() {
-  const { service, service$ } = useService(new UserinfoService());
+  const [ service, service$ ] = useService(UserinfoService.ins);
 
   useEffect(() => {
     service.getData();
@@ -283,21 +283,5 @@ export function Test2Page() {
 }
 ```
 
-After using the service, you need to consume the data of the service anywhere else, for example like this
-
-```ts
-new UserinfoService().loading = true;
-```
-
-Then you have to use `singleton` to create a singleton
-
-```ts
-import { singleton } from "react-rxbuilder";
-class UserinfoService {
-  constructor() {
-    return singleton(this);
-  }
-}
-```
 
 - If you don’t know anything, you can press `f12` on the api, and the editor will navigate you to the source code of the api (if you are using vscode)

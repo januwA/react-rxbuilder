@@ -1,3 +1,9 @@
+## 0.5.0 [2021-7-23]
+
+- readme
+- Fix recursive proxy
+- Add examples demo project
+
 ## 0.4.0 [2021-7-22]
 
 - add `useService` hook

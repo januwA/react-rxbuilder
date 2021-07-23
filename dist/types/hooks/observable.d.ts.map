@@ -1,1 +1,1 @@
-{"version":3,"file":"observable.d.ts","sourceRoot":"","sources":["../../../src/hooks/observable.ts"],"names":[],"mappings":"AAoBA,wBAAgB,UAAU,CAAC,IAAI,EAAE,GAAG,EAAE,OAAO,EAAE,MAAM,IAAI,OA2BxD"}
+{"version":3,"file":"observable.d.ts","sourceRoot":"","sources":["../../../src/hooks/observable.ts"],"names":[],"mappings":"AAqBA,wBAAgB,UAAU,CACxB,IAAI,EAAE,GAAG,EACT,OAAO,EAAE,MAAM,IAAI,EACnB,QAAQ,EAAE,OAAO,CAAC,GAAG,EAAE,OAAO,CAAC,OA8BhC"}
