@@ -19,8 +19,9 @@ export class CountService {
   constructor(public log: LogService) {}
 
   count = 0;
-  inc() {
-    this.count++;
+  inc = () => {
+    // Use instance instead of this in arrow functions
+    CountService.ins.count++;
     this.log.log();
   }
 }
@@ -42,9 +43,9 @@ ReactDOM.render(
             <br />
             <Link to="/test">Go To About Page</Link>
             <ul>
-              {LogService.instance.logs.map((e) => {
-                return <li key={e}>{e}</li>;
-              })}
+              {LogService.instance.logs.map((e) => (
+                <li key={e}>{e}</li>
+              ))}
             </ul>
           </Route>
         </Switch>

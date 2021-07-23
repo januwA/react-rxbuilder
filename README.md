@@ -194,7 +194,7 @@ Dependency injection service
 ```ts
 import ReactDOM from "react-dom";
 import { BrowserRouter, Switch, Route, Link } from "react-router-dom";
-import { Injectable, RxService } from "../src";
+import { Injectable, RxService } from "react-rxbuilder";
 
 @Injectable("instance")
 export class LogService {
@@ -213,8 +213,9 @@ export class CountService {
   constructor(public log: LogService) {}
 
   count = 0;
-  inc() {
-    this.count++;
+  inc = () => {
+    // Use instance instead of this in arrow functions
+    CountService.ins.count++;
     this.log.log();
   }
 }
@@ -224,7 +225,6 @@ ReactDOM.render(
     <RxService>
       {() => (
         <Switch>
-
           <Route path="/test">
             <p>{CountService.ins.count}</p>
             <button onClick={CountService.ins.inc}>click me</button>
@@ -237,12 +237,11 @@ ReactDOM.render(
             <br />
             <Link to="/test">Go To About Page</Link>
             <ul>
-              {LogService.instance.logs.map((e) => {
-                return <li key={e}>{e}</li>;
-              })}
+              {LogService.instance.logs.map((e) => (
+                <li key={e}>{e}</li>
+              ))}
             </ul>
           </Route>
-          
         </Switch>
       )}
     </RxService>
@@ -254,3 +253,4 @@ ReactDOM.render(
 
 
 - If you don’t know anything, you can press `f12` on the api, and the editor will navigate you to the source code of the api (if you are using vscode)
+- [What else??](https://www.youtube.com/watch?v=dQw4w9WgXcQ&ab_channel=RickAstley)

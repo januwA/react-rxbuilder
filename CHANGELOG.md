@@ -1,3 +1,7 @@
+## 0.6.1 [2021-7-24]
+
+- Optimized the synchronization response of `RxService`
+
 ## 0.6.0 [2021-7-23]
 
 - Add `Injectable` and `RxService`  

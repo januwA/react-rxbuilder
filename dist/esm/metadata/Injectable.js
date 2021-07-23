@@ -1,5 +1,5 @@
 import "reflect-metadata";
-import { Subject } from "rxjs";
+import { BehaviorSubject } from "rxjs";
 export const SERVICES = "__SERVICES__";
 export const DEFAULT_STATIC_INSTANCE = "ins";
 function isLikeOnject(value) {
@@ -66,7 +66,7 @@ export function Injectable(staticInstance = DEFAULT_STATIC_INSTANCE) {
         }
         const instance = Reflect.construct(target, args);
         const proxyInstance = observable(instance, () => service$.next(void 0));
-        const service$ = new Subject();
+        const service$ = new BehaviorSubject(undefined);
         cache.instance = proxyInstance;
         cache.service$ = service$;
         target.prototype.constructor[staticInstance.trim().length ? staticInstance : DEFAULT_STATIC_INSTANCE] = proxyInstance;
