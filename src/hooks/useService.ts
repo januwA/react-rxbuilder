@@ -74,21 +74,14 @@ export function useService<T>(
   }
 
   const prototype = Object.getPrototypeOf(service);
-  const staticCtx = Object.getOwnPropertyDescriptor(prototype, "constructor");
+  const cons = prototype.constructor;
 
-  if (!staticCtx) {
-    throw new Error("useService Error: can't get constructor function");
-  }
-
-  const cons = staticCtx.value;
-  if (!cons.hasOwnProperty(SERVICE)) {
-    _init(service);
-  }
+  if (!cons.hasOwnProperty(SERVICE)) _init(service);
 
   const destroy = () => {
-    cons[SERVICE].instance = null;
     if (cons[SERVICE].service$)
       (cons[SERVICE].service$ as BehaviorSubject<T>).unsubscribe();
+    cons[SERVICE].instance = null;
     cons[SERVICE].service$ = null;
     delete cons[SERVICE];
   };
