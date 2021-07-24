@@ -7,7 +7,8 @@ import commonConfig from "./common.config";
 import util from "./util";
 
 const devConfig: webpack.Configuration = merge(commonConfig, {
-  mode: process.env.NODE_ENV as "development",
+  mode: "development",
+  devtool: "eval",
   entry: path.resolve(__dirname, "../../examples", "index"),
   output: {
     filename: `[name].js`,
@@ -17,12 +18,9 @@ const devConfig: webpack.Configuration = merge(commonConfig, {
     clean: true,
   },
   plugins: [
-    // 生成一个 HTML5 文件
-    // https://github.com/jantimon/html-webpack-plugin#options
     new HtmlWebpackPlugin({
-      inject: false, // 不自动注入，在html中编写脚本设置注入位置
-      title: "webpack-scaffold",
-      template: path.resolve(__dirname, '../../examples/index.html'),
+      inject: false,
+      template: path.resolve(__dirname, "../../examples/index.html"),
     }),
   ],
 });

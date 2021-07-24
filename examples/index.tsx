@@ -17,7 +17,7 @@ export class LogService {
 export class CountService {
   static ins: CountService;
 
-  constructor() {}
+  constructor(public log: LogService) {}
 
   private _count = 0;
   get count(): number {
@@ -26,7 +26,7 @@ export class CountService {
 
   inc = () => {
     this._count++;
-    console.log(Injectable.prototype);
+    this.log.log()
   };
 }
 

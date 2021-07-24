@@ -81,6 +81,7 @@ export function Injectable(staticInstance = DEFAULT_STATIC_INSTANCE) {
 
   return function <T extends { new (...args: any[]): {} }>(target: T) {
     const className = target.name;
+
     if (className in cons[SERVICES]) return;
 
     const cache: {
@@ -100,6 +101,7 @@ export function Injectable(staticInstance = DEFAULT_STATIC_INSTANCE) {
     const proxyInstance = observable(instance, () => {
       service$.next(undefined);
     });
+
     const service$ = new BehaviorSubject(undefined);
     cache.staticInstance = staticInstance;
     cache.instance = proxyInstance;

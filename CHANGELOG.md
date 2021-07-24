@@ -1,3 +1,8 @@
+## 0.8.0 [2021-7-24]
+
+- Modify the packaged output
+
+
 ## 0.7.2 [2021-7-24]
 
 - New release
