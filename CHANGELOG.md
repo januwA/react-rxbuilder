@@ -1,3 +1,7 @@
+## 0.8.2 [2021-7-24]
+
+- update readme
+
 ## 0.8.1 [2021-7-24]
 
 - Fix the error when the service is empty

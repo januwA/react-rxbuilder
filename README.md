@@ -8,6 +8,18 @@ Use dependency injection to create services, inspired by Angular
 ## Install
 ```
 $ npm i react-rxbuilder
+$ npm i rxjs
+```
+
+Add two configurations to `tsconfig.json`
+
+```json
+{
+  "compilerOptions": {
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+  },
+}
 ```
 
 ## use RxBuilder
