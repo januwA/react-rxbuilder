@@ -1,10 +1,12 @@
 import React from "react";
 import { AsyncSnapshot, ConnectionState } from "./AsyncSnapshot";
 export class RxBuilder extends React.Component {
-    _sub;
-    state = {
-        snap: AsyncSnapshot.nothing(),
-    };
+    constructor() {
+        super(...arguments);
+        this.state = {
+            snap: AsyncSnapshot.nothing(),
+        };
+    }
     afterConnected(current) {
         return current.inState(ConnectionState.waiting);
     }
@@ -43,7 +45,8 @@ export class RxBuilder extends React.Component {
         });
     }
     _unsubscribe() {
-        this._sub?.unsubscribe();
+        var _a;
+        (_a = this._sub) === null || _a === void 0 ? void 0 : _a.unsubscribe();
     }
     componentDidMount() {
         this._subscribe();

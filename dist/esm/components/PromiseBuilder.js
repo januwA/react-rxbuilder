@@ -1,10 +1,13 @@
 import React from "react";
 import { AsyncSnapshot, ConnectionState } from "./AsyncSnapshot";
 export class PromiseBuilder extends React.Component {
-    _activeCallbackIdentity = null;
-    state = {
-        snap: AsyncSnapshot.nothing(),
-    };
+    constructor() {
+        super(...arguments);
+        this._activeCallbackIdentity = null;
+        this.state = {
+            snap: AsyncSnapshot.nothing(),
+        };
+    }
     _subscribe() {
         this.setState((prev) => ({
             snap: prev.snap.inState(ConnectionState.waiting),

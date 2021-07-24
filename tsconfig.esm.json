@@ -3,6 +3,8 @@
   "compilerOptions": {
     "rootDir": "./src/",
     "outDir": "./dist/esm",
+    "target": "ES2017",
+    "module": "ESNext",
     "sourceMap": false,
     "declaration": false,
     "declarationMap": false

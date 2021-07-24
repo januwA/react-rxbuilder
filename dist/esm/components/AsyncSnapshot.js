@@ -6,9 +6,6 @@ export var ConnectionState;
     ConnectionState[ConnectionState["done"] = 3] = "done";
 })(ConnectionState || (ConnectionState = {}));
 export class AsyncSnapshot {
-    connectionState;
-    data;
-    error;
     constructor(connectionState, data, error) {
         this.connectionState = connectionState;
         this.data = data;

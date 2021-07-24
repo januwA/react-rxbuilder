@@ -1,6 +1,6 @@
 {
   "name": "react-rxbuilder",
-  "version": "0.7.1",
+  "version": "0.7.2",
   "description": "Componentized Rxjs Observable",
   "private": false,
   "main": "./dist/umd/react-rxbuilder.js",

@@ -17,6 +17,7 @@ function getOwnPropertyDescriptor(target, key) {
     return getOwnPropertyDescriptor(Object.getPrototypeOf(target), key);
 }
 function observable(obj, changed) {
+    var _a;
     if (!observable.prototype.objcache) {
         observable.prototype.objcache = new WeakMap();
     }
@@ -24,7 +25,7 @@ function observable(obj, changed) {
     if (!isLikeOnject(obj))
         return obj;
     if (objcache.has(obj))
-        return objcache.get(obj) ?? obj;
+        return (_a = objcache.get(obj)) !== null && _a !== void 0 ? _a : obj;
     objcache.set(obj, undefined);
     for (const key in obj) {
         const value = obj[key];
@@ -38,19 +39,19 @@ function observable(obj, changed) {
     const proxy = new Proxy(obj, {
         get(target, key) {
             const des = getOwnPropertyDescriptor(target, key);
-            if (des?.value && typeof des.value === "function") {
+            if ((des === null || des === void 0 ? void 0 : des.value) && typeof des.value === "function") {
                 return likeArrowFunc(des.value)
-                    ? pfunc.bind(proxy, des?.value)
+                    ? pfunc.bind(proxy, des === null || des === void 0 ? void 0 : des.value)
                     : des.value.bind(proxy);
             }
-            if (des?.get)
+            if (des === null || des === void 0 ? void 0 : des.get)
                 return des.get.call(proxy);
             return target[key];
         },
         set(target, key, value) {
             const des = getOwnPropertyDescriptor(target, key);
             value = observable(value, changed);
-            if (des?.set)
+            if (des === null || des === void 0 ? void 0 : des.set)
                 des.set.call(proxy, value);
             else
                 target[key] = value;
@@ -63,15 +64,17 @@ function observable(obj, changed) {
     return proxy;
 }
 export function Injectable(staticInstance = DEFAULT_STATIC_INSTANCE) {
+    var _a;
     const cons = Injectable.prototype.constructor;
-    cons[SERVICES] ??= {};
+    (_a = cons[SERVICES]) !== null && _a !== void 0 ? _a : (cons[SERVICES] = {});
     return function (target) {
+        var _a;
         const className = target.name;
         if (className in cons[SERVICES])
             return;
         const cache = (cons[SERVICES][className] = {});
         const args = [];
-        const paramtypes = Reflect.getMetadata("design:paramtypes", target) ?? [];
+        const paramtypes = (_a = Reflect.getMetadata("design:paramtypes", target)) !== null && _a !== void 0 ? _a : [];
         for (const pa of paramtypes) {
             if (pa.name in cons[SERVICES])
                 args.push(cons[SERVICES][pa.name].instance);
