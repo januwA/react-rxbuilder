@@ -1,6 +1,6 @@
 import ReactDOM from "react-dom";
 import { BrowserRouter, Switch, Route, Link } from "react-router-dom";
-import { Injectable, RxService } from "../src";
+import { Injectable, RxService, useService } from "../src";
 
 @Injectable("instance")
 export class LogService {
@@ -16,14 +16,29 @@ export class LogService {
 @Injectable()
 export class CountService {
   static ins: CountService;
-  constructor(public log: LogService) {}
 
-  count = 0;
-  inc = () => {
-    // Use instance instead of this in arrow functions
-    CountService.ins.count++;
-    this.log.log();
+  constructor() {}
+
+  private _count = 0;
+  get count(): number {
+    return this._count;
   }
+
+  inc = () => {
+    this._count++;
+    console.log(Injectable.prototype);
+  };
+}
+
+function TestPage() {
+  const [c] = useService([CountService]);
+
+  return (
+    <>
+      <p>{c.count}</p>
+      <button onClick={c.inc}>click me</button>
+    </>
+  );
 }
 
 ReactDOM.render(
@@ -32,8 +47,7 @@ ReactDOM.render(
       {() => (
         <Switch>
           <Route path="/test">
-            <p>{CountService.ins.count}</p>
-            <button onClick={CountService.ins.inc}>click me</button>
+            <TestPage></TestPage>
           </Route>
 
           <Route path="/">

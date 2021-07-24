@@ -1,3 +1,9 @@
+## 0.7.0 [2021-7-24]
+
+- Fix the this of the arrow function
+- Fix `observable` cache
+- Add `useService`
+
 ## 0.6.1 [2021-7-24]
 
 - Optimized the synchronization response of `RxService`

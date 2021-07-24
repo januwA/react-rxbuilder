@@ -8,6 +8,10 @@ function isLikeOnject(value: any): boolean {
   return typeof value === "object" && value !== null;
 }
 
+function likeArrowFunc(f: Function): boolean {
+  return !f.prototype;
+}
+
 function getOwnPropertyDescriptor(
   target: any,
   key: any
@@ -18,32 +22,44 @@ function getOwnPropertyDescriptor(
   return getOwnPropertyDescriptor(Object.getPrototypeOf(target), key);
 }
 
-function observable(data: any, changed: () => void) {
+function observable(obj: any, changed: () => void) {
   if (!observable.prototype.objcache) {
     observable.prototype.objcache = new WeakMap();
   }
 
-  const objcache: WeakMap<any, boolean> = observable.prototype.objcache;
+  const objcache: WeakMap<any, any> = observable.prototype.objcache;
 
-  if (!isLikeOnject(data) || objcache.has(data)) return data;
+  if (!isLikeOnject(obj)) return obj;
 
-  objcache.set(data, true);
+  if (objcache.has(obj)) return objcache.get(obj) ?? obj;
 
-  for (const key in data) {
-    const value = data[key];
+  objcache.set(obj, undefined);
+
+  for (const key in obj) {
+    const value = obj[key];
     // 递归代理
-    if (isLikeOnject(value)) data[key] = observable(value, changed);
+    if (isLikeOnject(value)) obj[key] = observable(value, changed);
   }
 
-  const proxy: any = new Proxy(data, {
+  // 代理函数
+  function pfunc(this: any, fun: any, ...args: any[]) {
+    const v = fun.call(this, ...args);
+    return changed(), v;
+  }
+
+  const proxy: any = new Proxy(obj, {
     get(target: any, key: any) {
       const des = getOwnPropertyDescriptor(target, key);
-      if (des?.value && typeof des.value === "function")
-        return des.value.bind(proxy);
+      if (des?.value && typeof des.value === "function") {
+        return likeArrowFunc(des.value)
+          ? pfunc.bind(proxy, des?.value)
+          : des.value.bind(proxy);
+      }
+
       if (des?.get) return des.get.call(proxy);
       return target[key];
     },
-    set(target: any, key: any, value: any, receiver: any) {
+    set(target: any, key: any, value: any) {
       const des = getOwnPropertyDescriptor(target, key);
       value = observable(value, changed);
       if (des?.set) des.set.call(proxy, value);
@@ -52,7 +68,10 @@ function observable(data: any, changed: () => void) {
       return true;
     },
   });
-  objcache.set(proxy, true);
+
+  objcache.set(obj, proxy);
+  objcache.set(proxy, undefined);
+
   return proxy;
 }
 
@@ -60,11 +79,12 @@ export function Injectable(staticInstance = DEFAULT_STATIC_INSTANCE) {
   const cons = Injectable.prototype.constructor;
   cons[SERVICES] ??= {};
 
-  return function (target: any) {
+  return function <T extends { new (...args: any[]): {} }>(target: T) {
     const className = target.name;
     if (className in cons[SERVICES]) return;
 
     const cache: {
+      staticInstance?: any;
       instance?: any;
       service$?: BehaviorSubject<any>;
     } = (cons[SERVICES][className] = {});
@@ -72,21 +92,20 @@ export function Injectable(staticInstance = DEFAULT_STATIC_INSTANCE) {
     const args: any[] = [];
     const paramtypes = Reflect.getMetadata("design:paramtypes", target) ?? [];
     for (const pa of paramtypes) {
-      if (pa.name in cons[SERVICES]) {
+      if (pa.name in cons[SERVICES])
         args.push(cons[SERVICES][pa.name].instance);
-      }
     }
 
     const instance = Reflect.construct(target, args);
-    const proxyInstance = observable(instance, () => service$.next(void 0));
+    const proxyInstance = observable(instance, () => {
+      service$.next(undefined);
+    });
     const service$ = new BehaviorSubject(undefined);
-
+    cache.staticInstance = staticInstance;
     cache.instance = proxyInstance;
     cache.service$ = service$;
 
-    // 将单例写入静态属性上
-    target.prototype.constructor[
-      staticInstance.trim().length ? staticInstance : DEFAULT_STATIC_INSTANCE
-    ] = proxyInstance;
+    if (staticInstance.trim())
+      target.prototype.constructor[staticInstance] = proxyInstance;
   };
 }
