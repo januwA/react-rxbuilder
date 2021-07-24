@@ -1,3 +1,7 @@
+## 0.7.1 [2021-7-24]
+
+- New release
+
 ## 0.7.0 [2021-7-24]
 
 - Fix the this of the arrow function

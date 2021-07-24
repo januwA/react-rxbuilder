@@ -1,6 +1,6 @@
 {
   "name": "react-rxbuilder",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "description": "Componentized Rxjs Observable",
   "private": false,
   "main": "./dist/umd/react-rxbuilder.js",
@@ -21,6 +21,9 @@
     "react rxjs",
     "RxBuilder",
     "PromiseBuilder",
+    "react service",
+    "useService",
+    "RxService",
     "Ajanuw"
   ],
   "author": "Ajanuw",
