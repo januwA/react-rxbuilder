@@ -29,10 +29,7 @@ function getOwnPropertyDescriptor(
 }
 
 function observable(obj: any, changed: () => void) {
-  if (!observable.prototype.objcache) {
-    observable.prototype.objcache = new WeakMap();
-  }
-
+  observable.prototype.objcache ??= new WeakMap();
   const objcache: WeakMap<any, any> = observable.prototype.objcache;
 
   if (!isLikeOnject(obj)) return obj;
@@ -97,12 +94,11 @@ export function Injectable(staticInstance = DEFAULT_STATIC_INSTANCE) {
     if (className in cons[SERVICES]) return;
     cons[SERVICES][className] = {};
 
-    const args: any[] = [];
-    const paramtypes = Reflect.getMetadata("design:paramtypes", target) ?? [];
-    for (const pa of paramtypes) {
-      if (pa.name in cons[SERVICES])
-        args.push(cons[SERVICES][pa.name].instance);
-    }
+    const paramtypes: any[] =
+      Reflect.getMetadata("design:paramtypes", target) ?? [];
+    const args: any[] = paramtypes
+      .filter((pa) => pa.name in cons[SERVICES])
+      .map((pa) => cons[SERVICES][pa.name].instance);
 
     const instance = Reflect.construct(target, args);
     const proxyInstance = observable(instance, () => {

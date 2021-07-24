@@ -27,7 +27,7 @@ export const RxService: FC<{
       const stream = combineLatest(subjects);
       sub = stream
         .pipe(pipes ? pipes : pipe(mapTo(undefined), debounceTime(10)))
-        .subscribe((v) => setstate((prev) => prev + 1));
+        .subscribe(() => setstate((prev) => prev + 1));
     }
 
     return () => {
