@@ -1,9 +1,9 @@
-import { Injectable, SERVICES } from "../metadata/Injectable";
+import { getServiceCache } from "../metadata/Injectable";
 function getService(service) {
     var _a;
     if (service.name) {
-        const cons = Injectable.prototype.constructor;
-        return (_a = cons[SERVICES][service.name]) === null || _a === void 0 ? void 0 : _a.instance;
+        const cache = getServiceCache();
+        return (_a = cache[service.name]) === null || _a === void 0 ? void 0 : _a.instance;
     }
 }
 export function useService(service) {

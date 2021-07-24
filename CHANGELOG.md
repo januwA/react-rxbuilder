@@ -1,3 +1,7 @@
+## 0.8.1 [2021-7-24]
+
+- Fix the error when the service is empty
+
 ## 0.8.0 [2021-7-24]
 
 - Modify the packaged output

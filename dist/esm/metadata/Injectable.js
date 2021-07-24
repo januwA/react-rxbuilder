@@ -1,7 +1,7 @@
 import "reflect-metadata";
 import { BehaviorSubject } from "rxjs";
-export const SERVICES = "__SERVICES__";
-export const DEFAULT_STATIC_INSTANCE = "ins";
+const SERVICES = "__SERVICES__";
+const DEFAULT_STATIC_INSTANCE = "ins";
 function isLikeOnject(value) {
     return typeof value === "object" && value !== null;
 }
@@ -63,6 +63,10 @@ function observable(obj, changed) {
     objcache.set(proxy, undefined);
     return proxy;
 }
+export function getServiceCache() {
+    var _a;
+    return (_a = Injectable.prototype.constructor[SERVICES]) !== null && _a !== void 0 ? _a : {};
+}
 export function Injectable(staticInstance = DEFAULT_STATIC_INSTANCE) {
     var _a;
     const cons = Injectable.prototype.constructor;
@@ -72,7 +76,7 @@ export function Injectable(staticInstance = DEFAULT_STATIC_INSTANCE) {
         const className = target.name;
         if (className in cons[SERVICES])
             return;
-        const cache = (cons[SERVICES][className] = {});
+        cons[SERVICES][className] = {};
         const args = [];
         const paramtypes = (_a = Reflect.getMetadata("design:paramtypes", target)) !== null && _a !== void 0 ? _a : [];
         for (const pa of paramtypes) {
@@ -84,9 +88,9 @@ export function Injectable(staticInstance = DEFAULT_STATIC_INSTANCE) {
             service$.next(undefined);
         });
         const service$ = new BehaviorSubject(undefined);
-        cache.staticInstance = staticInstance;
-        cache.instance = proxyInstance;
-        cache.service$ = service$;
+        cons[SERVICES][className].staticInstance = staticInstance;
+        cons[SERVICES][className].instance = proxyInstance;
+        cons[SERVICES][className].service$ = service$;
         if (staticInstance.trim())
             target.prototype.constructor[staticInstance] = proxyInstance;
     };

@@ -1,4 +1,4 @@
-import { Injectable, SERVICES } from "../metadata/Injectable";
+import { getServiceCache } from "../metadata/Injectable";
 
 export interface Type<T> extends Function {
   new (...args: any[]): T;
@@ -6,8 +6,8 @@ export interface Type<T> extends Function {
 
 function getService(service: any) {
   if (service.name) {
-    const cons = Injectable.prototype.constructor;
-    return cons[SERVICES][service.name]?.instance;
+    const cache = getServiceCache();
+    return cache[service.name]?.instance;
   }
 }
 
