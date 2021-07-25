@@ -5,9 +5,6 @@ const DEFAULT_STATIC_INSTANCE = "ins";
 function isLikeOnject(value) {
     return typeof value === "object" && value !== null;
 }
-function likeArrowFunc(f) {
-    return !f.prototype;
-}
 function getOwnPropertyDescriptor(target, key) {
     if (!(key in target))
         return;
@@ -31,17 +28,11 @@ function observable(obj, changed) {
         if (isLikeOnject(value))
             obj[key] = observable(value, changed);
     }
-    function pfunc(fun, ...args) {
-        const v = fun.call(this, ...args);
-        return changed(), v;
-    }
     const proxy = new Proxy(obj, {
         get(target, key) {
             const des = getOwnPropertyDescriptor(target, key);
             if ((des === null || des === void 0 ? void 0 : des.value) && typeof des.value === "function") {
-                return likeArrowFunc(des.value)
-                    ? pfunc.bind(proxy, des === null || des === void 0 ? void 0 : des.value)
-                    : des.value.bind(proxy);
+                return des.value.bind(proxy);
             }
             if (des === null || des === void 0 ? void 0 : des.get)
                 return des.get.call(proxy);
@@ -66,6 +57,10 @@ export function getServiceCache() {
     var _a;
     return (_a = Injectable.prototype.constructor[SERVICES]) !== null && _a !== void 0 ? _a : {};
 }
+function getServiceList() {
+    return Object.values(getServiceCache()).map((e) => e.service$);
+}
+export const serviceList$ = new BehaviorSubject([]);
 export function Injectable(staticInstance = DEFAULT_STATIC_INSTANCE) {
     var _a;
     const cons = Injectable.prototype.constructor;
@@ -88,7 +83,9 @@ export function Injectable(staticInstance = DEFAULT_STATIC_INSTANCE) {
         cons[SERVICES][className].staticInstance = staticInstance;
         cons[SERVICES][className].instance = proxyInstance;
         cons[SERVICES][className].service$ = service$;
-        if (staticInstance.trim())
+        if (staticInstance.trim()) {
             target.prototype.constructor[staticInstance] = proxyInstance;
+        }
+        serviceList$.next(getServiceList());
     };
 }

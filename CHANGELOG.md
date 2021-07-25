@@ -1,3 +1,7 @@
+## 0.10.0 [2021-7-25]
+
+- Fix lazy loading service
+
 ## 0.9.0 [2021-7-25]
 
 - Modify the `useService` parameter

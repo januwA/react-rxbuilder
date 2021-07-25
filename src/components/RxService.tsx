@@ -1,39 +1,48 @@
 import { useEffect, FC, useState, ReactNode } from "react";
 import {
-  BehaviorSubject,
   combineLatest,
   debounceTime,
+  filter,
+  map,
   mapTo,
-  pipe,
+  pipe as rxpipe,
   Subscription,
+  tap,
   UnaryFunction,
 } from "rxjs";
-import { getServiceCache } from "../metadata/Injectable";
+import { serviceList$ } from "../metadata/Injectable";
 
+/**
+ * !只需要在程序中使用一次 RxService
+ * @param param0 
+ * @returns 
+ */
 export const RxService: FC<{
-  children: () => ReactNode;
-  pipes?: UnaryFunction<any, any>;
-}> = ({ children, pipes }) => {
-  const [_, setstate] = useState(0);
+  children: (...args: any) => ReactNode;
+  pipe?: UnaryFunction<any, any>;
+}> = ({ children, pipe }) => {
+  const [updateCount, inc] = useState(0);
 
   useEffect(() => {
-    const subjects: BehaviorSubject<any>[] = Object.values(
-      getServiceCache()
-    ).map((e) => e.service$);
-
     let sub: Subscription | undefined;
-
-    if (subjects.length) {
-      const stream = combineLatest(subjects);
-      sub = stream
-        .pipe(pipes ? pipes : pipe(mapTo(undefined), debounceTime(10)))
-        .subscribe(() => setstate((prev) => prev + 1));
-    }
+    const serviceListSub = serviceList$
+      .pipe(
+        filter((e) => e.length !== 0),
+        map((subjects) => combineLatest(subjects)),
+        tap(() => sub?.unsubscribe())
+      )
+      .subscribe((stream) => {
+        sub = stream
+          .pipe(pipe ? pipe : rxpipe(mapTo(undefined), debounceTime(10)))
+          .subscribe(() => {
+            inc((c) => c + 1);
+          });
+      });
 
     return () => {
-      if (sub) sub.unsubscribe();
+      serviceListSub.unsubscribe();
     };
   }, []);
 
-  return <>{children()}</>;
+  return <>{children(updateCount)}</>;
 };

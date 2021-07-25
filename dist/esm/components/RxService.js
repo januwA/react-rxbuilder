@@ -1,22 +1,23 @@
 import { Fragment as _Fragment, jsx as _jsx } from "react/jsx-runtime";
 import { useEffect, useState } from "react";
-import { combineLatest, debounceTime, mapTo, pipe, } from "rxjs";
-import { getServiceCache } from "../metadata/Injectable";
-export const RxService = ({ children, pipes }) => {
-    const [_, setstate] = useState(0);
+import { combineLatest, debounceTime, filter, map, mapTo, pipe as rxpipe, tap, } from "rxjs";
+import { serviceList$ } from "../metadata/Injectable";
+export const RxService = ({ children, pipe }) => {
+    const [updateCount, inc] = useState(0);
     useEffect(() => {
-        const subjects = Object.values(getServiceCache()).map((e) => e.service$);
         let sub;
-        if (subjects.length) {
-            const stream = combineLatest(subjects);
+        const serviceListSub = serviceList$
+            .pipe(filter((e) => e.length !== 0), map((subjects) => combineLatest(subjects)), tap(() => sub === null || sub === void 0 ? void 0 : sub.unsubscribe()))
+            .subscribe((stream) => {
             sub = stream
-                .pipe(pipes ? pipes : pipe(mapTo(undefined), debounceTime(10)))
-                .subscribe(() => setstate((prev) => prev + 1));
-        }
+                .pipe(pipe ? pipe : rxpipe(mapTo(undefined), debounceTime(10)))
+                .subscribe(() => {
+                inc((c) => c + 1);
+            });
+        });
         return () => {
-            if (sub)
-                sub.unsubscribe();
+            serviceListSub.unsubscribe();
         };
     }, []);
-    return _jsx(_Fragment, { children: children() }, void 0);
+    return _jsx(_Fragment, { children: children(updateCount) }, void 0);
 };

@@ -14,10 +14,6 @@ function isLikeOnject(value: any): boolean {
   return typeof value === "object" && value !== null;
 }
 
-function likeArrowFunc(f: Function): boolean {
-  return !f.prototype;
-}
-
 function getOwnPropertyDescriptor(
   target: any,
   key: any
@@ -44,19 +40,11 @@ function observable(obj: any, changed: () => void) {
     if (isLikeOnject(value)) obj[key] = observable(value, changed);
   }
 
-  // 代理函数
-  function pfunc(this: any, fun: any, ...args: any[]) {
-    const v = fun.call(this, ...args);
-    return changed(), v;
-  }
-
   const proxy: any = new Proxy(obj, {
     get(target: any, key: any) {
       const des = getOwnPropertyDescriptor(target, key);
       if (des?.value && typeof des.value === "function") {
-        return likeArrowFunc(des.value)
-          ? pfunc.bind(proxy, des?.value)
-          : des.value.bind(proxy);
+        return des.value.bind(proxy);
       }
 
       if (des?.get) return des.get.call(proxy);
@@ -84,12 +72,21 @@ export function getServiceCache(): {
   return Injectable.prototype.constructor[SERVICES] ?? {};
 }
 
+function getServiceList(): BehaviorSubject<any>[] {
+  return Object.values(getServiceCache()).map((e) => e.service$);
+}
+
+/**
+ * service 列表流
+ */
+export const serviceList$ = new BehaviorSubject<BehaviorSubject<any>[]>([]);
+
 /**
  * 创建一个服务
- * 
+ *
  * ! 不要在服务内使用箭头函数
  * @param staticInstance 默认将单例保存在静态属性`ins`上
- * @returns 
+ * @returns
  */
 export function Injectable(staticInstance = DEFAULT_STATIC_INSTANCE) {
   const cons = Injectable.prototype.constructor;
@@ -117,7 +114,10 @@ export function Injectable(staticInstance = DEFAULT_STATIC_INSTANCE) {
     cons[SERVICES][className].instance = proxyInstance;
     cons[SERVICES][className].service$ = service$;
 
-    if (staticInstance.trim())
+    if (staticInstance.trim()) {
       target.prototype.constructor[staticInstance] = proxyInstance;
+    }
+
+    serviceList$.next(getServiceList());
   };
 }
