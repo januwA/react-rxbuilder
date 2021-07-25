@@ -1,3 +1,7 @@
+## 0.9.0 [2021-7-25]
+
+- Modify the `useService` parameter
+
 ## 0.8.2 [2021-7-24]
 
 - update readme

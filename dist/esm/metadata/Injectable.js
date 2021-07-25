@@ -17,15 +17,14 @@ function getOwnPropertyDescriptor(target, key) {
     return getOwnPropertyDescriptor(Object.getPrototypeOf(target), key);
 }
 function observable(obj, changed) {
-    var _a;
-    if (!observable.prototype.objcache) {
-        observable.prototype.objcache = new WeakMap();
-    }
+    var _a, _b;
+    var _c;
+    (_a = (_c = observable.prototype).objcache) !== null && _a !== void 0 ? _a : (_c.objcache = new WeakMap());
     const objcache = observable.prototype.objcache;
     if (!isLikeOnject(obj))
         return obj;
     if (objcache.has(obj))
-        return (_a = objcache.get(obj)) !== null && _a !== void 0 ? _a : obj;
+        return (_b = objcache.get(obj)) !== null && _b !== void 0 ? _b : obj;
     objcache.set(obj, undefined);
     for (const key in obj) {
         const value = obj[key];
@@ -77,12 +76,10 @@ export function Injectable(staticInstance = DEFAULT_STATIC_INSTANCE) {
         if (className in cons[SERVICES])
             return;
         cons[SERVICES][className] = {};
-        const args = [];
         const paramtypes = (_a = Reflect.getMetadata("design:paramtypes", target)) !== null && _a !== void 0 ? _a : [];
-        for (const pa of paramtypes) {
-            if (pa.name in cons[SERVICES])
-                args.push(cons[SERVICES][pa.name].instance);
-        }
+        const args = paramtypes
+            .filter((pa) => pa.name in cons[SERVICES])
+            .map((pa) => cons[SERVICES][pa.name].instance);
         const instance = Reflect.construct(target, args);
         const proxyInstance = observable(instance, () => {
             service$.next(undefined);

@@ -1,6 +1,7 @@
 import * as path from "path";
 import * as webpack from "webpack";
 import util from "./util";
+const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 
 /**
  * 在[dev/prod.config.js]中公用的配置
@@ -44,6 +45,7 @@ const commonConfig: webpack.Configuration = {
   resolve: {
     extensions: [".tsx", ".ts", ".js"],
   },
+  plugins: [new CleanWebpackPlugin()],
 };
 
 export default commonConfig;

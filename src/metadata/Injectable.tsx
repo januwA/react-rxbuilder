@@ -84,6 +84,13 @@ export function getServiceCache(): {
   return Injectable.prototype.constructor[SERVICES] ?? {};
 }
 
+/**
+ * 创建一个服务
+ * 
+ * ! 不要在服务内使用箭头函数
+ * @param staticInstance 默认将单例保存在静态属性`ins`上
+ * @returns 
+ */
 export function Injectable(staticInstance = DEFAULT_STATIC_INSTANCE) {
   const cons = Injectable.prototype.constructor;
   cons[SERVICES] ??= {};

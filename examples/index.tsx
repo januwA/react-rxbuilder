@@ -6,7 +6,7 @@ import { Injectable, RxService, useService } from "../src";
 export class LogService {
   static instance: LogService;
 
-  private len = 0;
+  len = 0;
   logs: string[] = [];
   log() {
     this.logs.push(`(${++this.len}) Log: ${new Date().toLocaleTimeString()}`);
@@ -26,16 +26,18 @@ export class CountService {
 
   inc = () => {
     this._count++;
-    this.log.log()
+    this.log.log();
   };
 }
 
 function TestPage() {
-  const [c] = useService([CountService]);
+  const [c, l] = useService(CountService, LogService);
 
   return (
     <>
-      <p>{c.count}</p>
+      <p>
+        {c.count} | {l.len}
+      </p>
       <button onClick={c.inc}>click me</button>
     </>
   );

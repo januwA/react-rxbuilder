@@ -203,6 +203,8 @@ Dependency injection service
 
 *When there is a dependency cycle, do not hesitate to write the two dependencies as one*
 
+*Do not use arrow functions in the service*
+
 ```ts
 import ReactDOM from "react-dom";
 import { BrowserRouter, Switch, Route, Link } from "react-router-dom";
@@ -225,7 +227,7 @@ export class CountService {
   constructor(public log: LogService) {}
 
   count = 0;
-  inc = () => {
+  inc() {
     // Use instance instead of this in arrow functions
     CountService.ins.count++;
     this.log.log();

@@ -1,61 +1,26 @@
 import { getServiceCache } from "../metadata/Injectable";
 
-export interface Type<T> extends Function {
-  new (...args: any[]): T;
-}
+type Constructor<T> = new (...args: any[]) => T;
 
-function getService(service: any) {
-  if (service.name) {
-    const cache = getServiceCache();
-    return cache[service.name]?.instance;
-  }
-}
+const getService = (service: Constructor<any>) => {
+  return getServiceCache()[service.name]?.instance;
+};
 
-export function useService<T>(service: Type<T>): T;
-export function useService<A>(service: [Type<A>]): [A];
-export function useService<A, B>(service: [Type<A>, Type<B>]): [A, B];
-export function useService<A, B, C>(
-  service: [Type<A>, Type<B>, Type<C>]
-): [A, B, C];
-export function useService<A, B, C, D>(
-  service: [Type<A>, Type<B>, Type<C>, Type<D>]
-): [A, B, C, D];
-export function useService<A, B, C, D, E>(
-  service: [Type<A>, Type<B>, Type<C>, Type<D>, Type<E>]
-): [A, B, C, D, E];
-export function useService<A, B, C, D, E, F>(
-  service: [Type<A>, Type<B>, Type<C>, Type<D>, Type<E>, Type<F>]
-): [A, B, C, D, E, F];
-export function useService<A, B, C, D, E, F, G>(
-  service: [Type<A>, Type<B>, Type<C>, Type<D>, Type<E>, Type<F>, Type<G>]
-): [A, B, C, D, E, F, G];
-export function useService<A, B, C, D, E, F, G, H>(
-  service: [
-    Type<A>,
-    Type<B>,
-    Type<C>,
-    Type<D>,
-    Type<E>,
-    Type<F>,
-    Type<G>,
-    Type<H>
-  ]
-): [A, B, C, D, E, F, G, H];
-export function useService<A, B, C, D, E, F, G, H, I, J>(
-  service: [
-    Type<A>,
-    Type<B>,
-    Type<C>,
-    Type<D>,
-    Type<E>,
-    Type<F>,
-    Type<G>,
-    Type<H>,
-    Type<I>,
-    Type<J>
-  ]
-): [A, B, C, D, E, F, G, H, I, J];
-export function useService(service: any): any {
-  if (Array.isArray(service)) return service.map(getService);
-  return getService(service);
+type MapPredicate<T> = T extends Constructor<any> ? InstanceType<T> : never;
+
+type Mapped<
+  Arr extends Array<unknown>,
+  Result extends Array<unknown> = []
+> = Arr extends []
+  ? []
+  : Arr extends [infer H]
+  ? [...Result, MapPredicate<H>]
+  : Arr extends [infer Head, ...infer Tail]
+  ? Mapped<[...Tail], [...Result, MapPredicate<Head>]>
+  : Readonly<Result>;
+
+export function useService<C extends Constructor<any>, Classes extends C[]>(
+  ...klasses: [...Classes]
+): Mapped<Classes> {
+  return klasses.map(getService) as Mapped<Classes>;
 }
