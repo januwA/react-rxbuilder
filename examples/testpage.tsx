@@ -9,6 +9,14 @@ class LazyService {
   }
 }
 
+@Injectable()
+export class LogService {
+  len = 0;
+  logs: string[] = [];
+  log() {
+  }
+}
+
 export default function TestPage() {
   const [c, lz] = useService(CountService, LazyService);
   return (

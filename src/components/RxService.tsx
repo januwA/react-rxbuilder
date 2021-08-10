@@ -10,7 +10,7 @@ import {
   tap,
   UnaryFunction,
 } from "rxjs";
-import { serviceList$ } from "../metadata/Injectable";
+import { serviceSubjects$ } from "../metadata/Injectable";
 
 /**
  * !只需要在程序中使用一次 RxService
@@ -25,7 +25,7 @@ export const RxService: FC<{
 
   useEffect(() => {
     let sub: Subscription | undefined;
-    const serviceListSub = serviceList$
+    const serviceListSub = serviceSubjects$
       .pipe(
         filter((e) => e.length !== 0),
         map((subjects) => combineLatest(subjects)),
@@ -46,3 +46,16 @@ export const RxService: FC<{
 
   return <>{children(updateCount)}</>;
 };
+
+export interface OnCreate {
+  OnCreate(): any;
+}
+
+
+export interface OnChanged {
+  OnChanged(): any;
+}
+
+export interface OnUpdate {
+  OnUpdate(): any;
+}

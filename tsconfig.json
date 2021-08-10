@@ -7,6 +7,7 @@
     "module": "ESNext", /* Specify module code generation: 'none', 'commonjs', 'amd', 'system', 'umd', 'es2015', 'es2020', or 'ESNext'. */
     "lib": [
       "dom",
+      "ES2017"
     ], /* Specify library files to be included in the compilation. */
     "allowJs": false, /* 允许编译javascript文件。 */
     // "checkJs": true,                       /* Report errors in .js files. */

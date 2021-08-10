@@ -1,6 +1,6 @@
 import "reflect-metadata";
-import { BehaviorSubject } from "rxjs";
-const SERVICES = "__SERVICES__";
+import { BehaviorSubject, debounceTime } from "rxjs";
+const SERVICE_ID = "__SERVICE_ID__";
 const DEFAULT_STATIC_INSTANCE = "ins";
 function isLikeOnject(value) {
     return typeof value === "object" && value !== null;
@@ -53,39 +53,74 @@ function observable(obj, changed) {
     objcache.set(proxy, undefined);
     return proxy;
 }
-export function getServiceCache() {
+export function getService(service) {
     var _a;
-    return (_a = Injectable.prototype.constructor[SERVICES]) !== null && _a !== void 0 ? _a : {};
+    const manager = new ServiceManager();
+    return (_a = manager.get(service)) === null || _a === void 0 ? void 0 : _a.instance;
 }
-function getServiceList() {
-    return Object.values(getServiceCache()).map((e) => e.service$);
+export const serviceSubjects$ = new BehaviorSubject([]);
+class ServiceManager {
+    constructor() {
+        var _a;
+        this.services = {};
+        return (_a = ServiceManager.ins) !== null && _a !== void 0 ? _a : (ServiceManager.ins = this);
+    }
+    getID(service) {
+        return service.prototype.constructor[SERVICE_ID];
+    }
+    setID(service, id) {
+        return service.prototype.constructor[SERVICE_ID] = id;
+    }
+    exist(service) {
+        const id = this.getID(service);
+        return id && id in this.services;
+    }
+    get(service) {
+        return this.services[this.getID(service)];
+    }
+    initService(service) {
+        const id = this.setID(service, `${++ServiceManager.ID}_${service.name}`);
+        return this.services[id] = {};
+    }
+    get serviceSubjects() {
+        return Object.values(this.services).map(e => e.service$);
+    }
 }
-export const serviceList$ = new BehaviorSubject([]);
+ServiceManager.ID = 0;
+const callHook = (t, hook) => {
+    if (Reflect.has(t, hook)) {
+        Reflect.get(t, hook)();
+    }
+};
+const callCreate = (t) => callHook(t, 'OnCreate');
+const callChanged = (t) => callHook(t, 'OnChanged');
+const callUpdate = (t) => callHook(t, 'OnUpdate');
 export function Injectable(staticInstance = DEFAULT_STATIC_INSTANCE) {
-    var _a;
-    const cons = Injectable.prototype.constructor;
-    (_a = cons[SERVICES]) !== null && _a !== void 0 ? _a : (cons[SERVICES] = {});
+    const manager = new ServiceManager();
     return function (target) {
         var _a;
-        const className = target.name;
-        if (className in cons[SERVICES])
+        if (manager.exist(target))
             return;
-        cons[SERVICES][className] = {};
-        const paramtypes = (_a = Reflect.getMetadata("design:paramtypes", target)) !== null && _a !== void 0 ? _a : [];
-        const args = paramtypes
-            .filter((pa) => pa.name in cons[SERVICES])
-            .map((pa) => cons[SERVICES][pa.name].instance);
+        const args = ((_a = Reflect.getMetadata("design:paramtypes", target)) !== null && _a !== void 0 ? _a : [])
+            .filter((param) => manager.exist(param))
+            .map((param) => manager.get(param).instance);
         const instance = Reflect.construct(target, args);
-        const proxyInstance = observable(instance, () => {
+        const service = manager.initService(target);
+        const proxy = observable(instance, () => {
+            callChanged(proxy);
             service$.next(undefined);
         });
         const service$ = new BehaviorSubject(undefined);
-        cons[SERVICES][className].staticInstance = staticInstance;
-        cons[SERVICES][className].instance = proxyInstance;
-        cons[SERVICES][className].service$ = service$;
+        service$.pipe(debounceTime(10)).subscribe(r => {
+            callUpdate(proxy);
+        });
+        service.staticInstance = staticInstance;
+        service.instance = proxy;
+        service.service$ = service$;
         if (staticInstance.trim()) {
-            target.prototype.constructor[staticInstance] = proxyInstance;
+            target.prototype.constructor[staticInstance] = proxy;
         }
-        serviceList$.next(getServiceList());
+        serviceSubjects$.next(manager.serviceSubjects);
+        callCreate(proxy);
     };
 }

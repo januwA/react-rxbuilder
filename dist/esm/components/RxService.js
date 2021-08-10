@@ -1,12 +1,12 @@
 import { Fragment as _Fragment, jsx as _jsx } from "react/jsx-runtime";
 import { useEffect, useState } from "react";
 import { combineLatest, debounceTime, filter, map, mapTo, pipe as rxpipe, tap, } from "rxjs";
-import { serviceList$ } from "../metadata/Injectable";
+import { serviceSubjects$ } from "../metadata/Injectable";
 export const RxService = ({ children, pipe }) => {
     const [updateCount, inc] = useState(0);
     useEffect(() => {
         let sub;
-        const serviceListSub = serviceList$
+        const serviceListSub = serviceSubjects$
             .pipe(filter((e) => e.length !== 0), map((subjects) => combineLatest(subjects)), tap(() => sub === null || sub === void 0 ? void 0 : sub.unsubscribe()))
             .subscribe((stream) => {
             sub = stream

@@ -1,9 +1,7 @@
-import { Injectable } from "../src";
+import { Injectable, OnChanged, OnCreate, OnUpdate } from "../src";
 
-@Injectable("instance")
+@Injectable()
 export class LogService {
-  static instance: LogService;
-
   len = 0;
   logs: string[] = [];
   log() {
@@ -12,18 +10,31 @@ export class LogService {
 }
 
 @Injectable()
-export class CountService {
-  static ins: CountService;
-
+export class CountService implements OnCreate, OnChanged, OnUpdate {
   constructor(public log: LogService) {}
 
-  private _count = 0;
-  get count(): number {
-    return this._count;
+  async initCount() {
+    const data = JSON.parse(localStorage.getItem("count") ?? "");
+    this.count = data.count;
+    Object.assign(this.log, data.log);
   }
 
-  inc = () => {
-    this._count++;
+  async OnCreate() {
+    await this.initCount();
+  }
+
+  OnUpdate() {
+    localStorage.setItem("count", JSON.stringify(this));
+  }
+
+  OnChanged() {
+    console.log("OnChanged");
+  }
+
+  count = 0;
+  inc() {
+    this.count++;
+    this.count++;
     this.log.log();
-  };
+  }
 }

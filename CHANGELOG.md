@@ -1,3 +1,8 @@
+## 0.11.0 [2021-8-10]
+
+- Change how the service is stored
+- Add service lifecycle hook
+
 ## 0.10.0 [2021-7-25]
 
 - Fix lazy loading service
