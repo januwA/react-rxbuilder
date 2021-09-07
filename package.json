@@ -1,13 +1,12 @@
 {
   "name": "react-rxbuilder",
-  "version": "0.12.0",
+  "version": "1.0.0",
   "description": "Componentized Rxjs Observable",
   "private": false,
   "main": "./dist/umd/react-rxbuilder.js",
   "module": "./dist/esm/index.js",
   "types": "./dist/types/index.d.ts",
   "scripts": {
-    "start": "cross-env TS_NODE_PROJECT=config/webpack/tsconfig.json NODE_ENV=development ts-node config/webpack/dev-server.ts",
     "esm": "tsc --project tsconfig.esm.json",
     "umd": "cross-env TS_NODE_PROJECT=config/webpack/tsconfig.json NODE_ENV=production webpack -c config/webpack/prod.config.ts",
     "build": "npm run umd && npm run esm"
@@ -21,9 +20,6 @@
     "react rxjs",
     "RxBuilder",
     "PromiseBuilder",
-    "react service",
-    "useService",
-    "RxService",
     "Ajanuw"
   ],
   "author": "Ajanuw",
@@ -55,8 +51,5 @@
     "webpack-cli": "^4.7.2",
     "webpack-dev-server": "^3.11.2",
     "webpack-merge": "^5.8.0"
-  },
-  "dependencies": {
-    "reflect-metadata": "^0.1.13"
   }
 }

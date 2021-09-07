@@ -2,13 +2,9 @@
 
 Use rxjs Observable on react components, Inspiration comes from flutter's  [StreamBuilder](https://api.flutter.dev/flutter/widgets/StreamBuilder-class.html)
 
-Use dependency injection to create services, inspired by Angular
-
-
 ## Install
 ```
 $ npm i react-rxbuilder
-$ npm i rxjs
 ```
 
 Add two configurations to `tsconfig.json`
@@ -199,69 +195,4 @@ export function TestPage() {
 
 ## RxService
 
-Dependency injection service
-
-*When there is a dependency cycle, do not hesitate to write the two dependencies as one*
-
-*Do not use arrow functions in the service*
-
-```ts
-import ReactDOM from "react-dom";
-import { BrowserRouter, Switch, Route, Link } from "react-router-dom";
-import { Injectable, RxService } from "react-rxbuilder";
-
-@Injectable()
-export class LogService {
-  private len = 0;
-  logs: string[] = [];
-  log() {
-    this.logs.push(`(${++this.len}) Log: ${new Date().toLocaleTimeString()}`);
-  }
-}
-
-@Injectable()
-export class CountService {
-  constructor(public log: LogService) {}
-
-  count = 0;
-  inc() {
-    // Use instance instead of this in arrow functions
-    this.count++;
-    this.log.log();
-  }
-}
-
-ReactDOM.render(
-  <BrowserRouter>
-    <RxService>
-      {() => (
-        <Switch>
-          <Route path="/test">
-            <p>{CountService.ins.count}</p>
-            <button onClick={CountService.ins.inc}>click me</button>
-          </Route>
-
-          <Route path="/">
-            <button onClick={CountService.ins.inc}>
-              click me {CountService.ins.count}
-            </button>
-            <br />
-            <Link to="/test">Go To About Page</Link>
-            <ul>
-              {LogService.instance.logs.map((e) => (
-                <li key={e}>{e}</li>
-              ))}
-            </ul>
-          </Route>
-        </Switch>
-      )}
-    </RxService>
-  </BrowserRouter>,
-
-  document.getElementById("root")
-);
-```
-
-- [todos example](https://codesandbox.io/s/rxbuilder-todos-yw5ux)
-- If you don’t know anything, you can press `f12` on the api, and the editor will navigate you to the source code of the api (if you are using vscode)
-- [What else??](https://www.youtube.com/watch?v=dQw4w9WgXcQ&ab_channel=RickAstley)
+> Migrated to [react-rxservice](https://github.com/januwA/react-rxservice)

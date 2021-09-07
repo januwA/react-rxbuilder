@@ -1,3 +1,7 @@
+## 1.0.0 [2021-9-7]
+
+- Move RxService to a separate [react-rxservice](https://github.com/januwA/react-rxservice) library
+
 ## 0.12.0 [2021-9-7]
 
 - You can choose non-global registration when defining the service
