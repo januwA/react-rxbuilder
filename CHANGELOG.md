@@ -1,3 +1,7 @@
+## 0.12.0 [2021-9-7]
+
+- You can choose non-global registration when defining the service
+
 ## 0.11.0 [2021-8-10]
 
 - Change how the service is stored

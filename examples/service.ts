@@ -10,26 +10,26 @@ export class LogService {
 }
 
 @Injectable()
-export class CountService implements OnCreate, OnChanged, OnUpdate {
+export class CountService /* implements OnCreate, OnChanged, OnUpdate*/ {
   constructor(public log: LogService) {}
 
-  async initCount() {
-    const data = JSON.parse(localStorage.getItem("count") ?? "");
-    this.count = data.count;
-    Object.assign(this.log, data.log);
-  }
+  // async initCount() {
+  //   const data = JSON.parse(localStorage.getItem("count") ?? "");
+  //   this.count = data.count;
+  //   Object.assign(this.log, data.log);
+  // }
 
-  async OnCreate() {
-    await this.initCount();
-  }
+  // async OnCreate() {
+  //   await this.initCount();
+  // }
 
-  OnUpdate() {
-    localStorage.setItem("count", JSON.stringify(this));
-  }
+  // OnUpdate() {
+  //   localStorage.setItem("count", JSON.stringify(this));
+  // }
 
-  OnChanged() {
-    console.log("OnChanged");
-  }
+  // OnChanged() {
+  //   console.log("OnChanged");
+  // }
 
   count = 0;
   inc() {

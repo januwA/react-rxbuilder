@@ -54,11 +54,10 @@ function observable(obj, changed) {
     return proxy;
 }
 export function getService(service) {
-    var _a;
     const manager = new ServiceManager();
-    return (_a = manager.get(service)) === null || _a === void 0 ? void 0 : _a.instance;
+    return manager.get(service);
 }
-export const serviceSubjects$ = new BehaviorSubject([]);
+export const GLOBAL_SERVICE_SUBJECT = new BehaviorSubject([]);
 class ServiceManager {
     constructor() {
         var _a;
@@ -95,10 +94,14 @@ const callHook = (t, hook) => {
 const callCreate = (t) => callHook(t, 'OnCreate');
 const callChanged = (t) => callHook(t, 'OnChanged');
 const callUpdate = (t) => callHook(t, 'OnUpdate');
-export function Injectable(staticInstance = DEFAULT_STATIC_INSTANCE) {
+export function Injectable(config) {
+    config = Object.assign({}, {
+        staticInstance: DEFAULT_STATIC_INSTANCE,
+        global: true
+    }, config);
     const manager = new ServiceManager();
     return function (target) {
-        var _a;
+        var _a, _b;
         if (manager.exist(target))
             return;
         const args = ((_a = Reflect.getMetadata("design:paramtypes", target)) !== null && _a !== void 0 ? _a : [])
@@ -114,13 +117,14 @@ export function Injectable(staticInstance = DEFAULT_STATIC_INSTANCE) {
         service$.pipe(debounceTime(10)).subscribe(r => {
             callUpdate(proxy);
         });
-        service.staticInstance = staticInstance;
+        service.staticInstance = config === null || config === void 0 ? void 0 : config.staticInstance;
         service.instance = proxy;
         service.service$ = service$;
-        if (staticInstance.trim()) {
-            target.prototype.constructor[staticInstance] = proxy;
+        if ((_b = config === null || config === void 0 ? void 0 : config.staticInstance) === null || _b === void 0 ? void 0 : _b.trim()) {
+            target.prototype.constructor[config.staticInstance] = proxy;
         }
-        serviceSubjects$.next(manager.serviceSubjects);
+        if (config === null || config === void 0 ? void 0 : config.global)
+            GLOBAL_SERVICE_SUBJECT.next(manager.serviceSubjects);
         callCreate(proxy);
     };
 }

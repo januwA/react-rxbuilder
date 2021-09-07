@@ -210,10 +210,8 @@ import ReactDOM from "react-dom";
 import { BrowserRouter, Switch, Route, Link } from "react-router-dom";
 import { Injectable, RxService } from "react-rxbuilder";
 
-@Injectable("instance")
+@Injectable()
 export class LogService {
-  static instance: LogService;
-
   private len = 0;
   logs: string[] = [];
   log() {
@@ -223,13 +221,12 @@ export class LogService {
 
 @Injectable()
 export class CountService {
-  static ins: CountService;
   constructor(public log: LogService) {}
 
   count = 0;
   inc() {
     // Use instance instead of this in arrow functions
-    CountService.ins.count++;
+    this.count++;
     this.log.log();
   }
 }

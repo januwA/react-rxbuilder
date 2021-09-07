@@ -7,7 +7,7 @@ const DEFAULT_STATIC_INSTANCE = "ins";
 export type Constructor<T> = new (...args: any[]) => T;
 
 export interface ServiceCache {
-  staticInstance?: any;
+  staticInstance?: string;
   instance: any;
   service$: BehaviorSubject<any>;
 }
@@ -70,13 +70,10 @@ function observable(obj: any, changed: () => void) {
 
 export function getService(service: Constructor<any>) {
   const manager = new ServiceManager();
-  return manager.get(service)?.instance
+  return manager.get(service)
 }
 
-/**
- * service 列表流
- */
-export const serviceSubjects$ = new BehaviorSubject<BehaviorSubject<any>[]>([]);
+export const GLOBAL_SERVICE_SUBJECT = new BehaviorSubject<BehaviorSubject<any>[]>([]);
 
 
 class ServiceManager {
@@ -131,10 +128,15 @@ const callUpdate = (t: any) => callHook(t, 'OnUpdate')
  * 创建一个服务
  *
  * ! 不要在服务内使用箭头函数
- * @param staticInstance 默认将单例保存在静态属性`ins`上
- * @returns
  */
-export function Injectable(staticInstance = DEFAULT_STATIC_INSTANCE) {
+export function Injectable(config?: {
+  global?: boolean
+  staticInstance?: string
+}) {
+  config = Object.assign({}, {
+    staticInstance: DEFAULT_STATIC_INSTANCE,
+    global: true
+  }, config)
   const manager = new ServiceManager();
 
   return function (target: Constructor<any>) {
@@ -159,15 +161,15 @@ export function Injectable(staticInstance = DEFAULT_STATIC_INSTANCE) {
       callUpdate(proxy)
     });
 
-    service.staticInstance = staticInstance;
+    service.staticInstance = config?.staticInstance;
     service.instance = proxy;
     service.service$ = service$;
 
-    if (staticInstance.trim()) {
-      target.prototype.constructor[staticInstance] = proxy;
+    if (config?.staticInstance?.trim()) {
+      target.prototype.constructor[config.staticInstance] = proxy;
     }
 
-    serviceSubjects$.next(manager.serviceSubjects);
+    if (config?.global) GLOBAL_SERVICE_SUBJECT.next(manager.serviceSubjects);
     callCreate(proxy)
   };
 }

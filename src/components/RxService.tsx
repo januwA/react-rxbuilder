@@ -1,5 +1,6 @@
 import { useEffect, FC, useState, ReactNode } from "react";
 import {
+  BehaviorSubject,
   combineLatest,
   debounceTime,
   filter,
@@ -10,25 +11,28 @@ import {
   tap,
   UnaryFunction,
 } from "rxjs";
-import { serviceSubjects$ } from "../metadata/Injectable";
+import { Constructor, getService, GLOBAL_SERVICE_SUBJECT } from "../metadata/Injectable";
 
-/**
- * !只需要在程序中使用一次 RxService
- * @param param0 
- * @returns 
- */
 export const RxService: FC<{
   children: (...args: any) => ReactNode;
   pipe?: UnaryFunction<any, any>;
-}> = ({ children, pipe }) => {
+  services?: Constructor<any>[]
+}> = ({ children, pipe, services }) => {
   const [updateCount, inc] = useState(0);
 
   useEffect(() => {
     let sub: Subscription | undefined;
-    const serviceListSub = serviceSubjects$
+    let serviceListSub: Subscription;
+
+    const scopeServiceList: BehaviorSubject<any>[] = (services ?? []).map(s => getService(s).service$);
+
+    serviceListSub = GLOBAL_SERVICE_SUBJECT
       .pipe(
-        filter((e) => e.length !== 0),
-        map((subjects) => combineLatest(subjects)),
+        map((subjects) => {
+          console.log(subjects, scopeServiceList);
+
+          return combineLatest([...subjects, ...scopeServiceList]);
+        }),
         tap(() => sub?.unsubscribe())
       )
       .subscribe((stream) => {
@@ -38,6 +42,7 @@ export const RxService: FC<{
             inc((c) => c + 1);
           });
       });
+
 
     return () => {
       serviceListSub.unsubscribe();
@@ -50,7 +55,6 @@ export const RxService: FC<{
 export interface OnCreate {
   OnCreate(): any;
 }
-
 
 export interface OnChanged {
   OnChanged(): any;

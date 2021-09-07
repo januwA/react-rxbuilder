@@ -24,5 +24,5 @@ type Mapped<
 export function useService<C extends Constructor<any>, Classes extends C[]>(
   ...klasses: [...Classes]
 ): Mapped<Classes> {
-  return klasses.map(getService) as Mapped<Classes>;
+  return klasses.map((s) => getService(s)?.instance) as Mapped<Classes>;
 }
